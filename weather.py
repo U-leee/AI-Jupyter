@@ -72,3 +72,7 @@ def test_weather(date=((datetime.now())-timedelta(days=1)).strftime('%Y%m%d')): 
     
     return df
 
+
+if __name__=='__main__':
+    train=train_weather()
+    test=test_weather()
