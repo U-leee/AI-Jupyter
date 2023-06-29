@@ -64,7 +64,7 @@ def test_weather(date=((datetime.now())-timedelta(days=1)).strftime('%Y%m%d')): 
     df=df.pivot('ds','category','value')
     df=df.reset_index()
     df.TMP=df.TMP.apply(float)
-    df['PCP']=df['PCP'].str.replace('mm','')
+    df['PCP']=df['PCP'].apply(lambda x: x.split('~')[0].strip('mm'))
     df['PCP']=df['PCP'].replace({'강수없음':'0.0'}).apply(float)
     df=df.fillna(method='ffill') #혹시모를 결측값 처리
     df=df[['ds','TMP','PCP']] #열순서 변경
