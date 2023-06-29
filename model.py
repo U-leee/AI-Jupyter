@@ -67,12 +67,12 @@ class Model():
 
 
             #시각화
-            fig=m.plot(forecast)
-            ax=fig.gca()
-            ax.plot(group['ds'],group['y'],'b.')
+            # fig=m.plot(forecast)
+            # ax=fig.gca()
+            # ax.plot(group['ds'],group['y'],'b.')
 
-            comp_plot=m.plot_components(forecast)
-            plt.show()
+            # comp_plot=m.plot_components(forecast)
+            # plt.show()
 
             #performance=pd.merge(group, forecast[['ds','yhat','yhat_lower','yhat_upper']], on='ds')
             mae=mean_absolute_error(group['y'], forecast['yhat'][:-72])
@@ -139,12 +139,12 @@ class Model():
 
 
             #시각화
-            fig=model.plot(forecast2)
-            ax=fig.gca()
-            ax.plot(group['ds'],group['y'],'b.')
+            # fig=model.plot(forecast2)
+            # ax=fig.gca()
+            # ax.plot(group['ds'],group['y'],'b.')
 
-            comp_plot2=model.plot_components(forecast2)
-            plt.show()
+            # comp_plot2=model.plot_components(forecast2)
+            # plt.show()
 
             #performance=pd.merge(group, forecast[['ds','yhat','yhat_lower','yhat_upper']], on='ds')
             mae=mean_absolute_error(group['y'], forecast2['yhat'][:-8*24])
