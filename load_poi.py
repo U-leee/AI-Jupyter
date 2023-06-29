@@ -48,13 +48,14 @@ def load_poi():
                 datetime = item['datetime']
 
                 # 'df'에 새로운 데이터 추가하고 인덱스 재설정
-                df = df.append({
+                new = pd.DataFrame({
                     #'Id': poi_id,
-                    'ticker': poi_name,
-                    'y': congestion,
+                    'ticker': [poi_name],
+                    'y': [congestion],
                     #'CongestionLevel': congestion_level,
-                    'ds': datetime
-                }, ignore_index=True)
+                    'ds': [datetime]
+                })
+                df=pd.concat([df,new], ignore_index=True)
 
         return df
     def get_data_areas(date, df):
@@ -89,13 +90,14 @@ def load_poi():
                 congestion = item['congestion']
                 congestion_level = item['congestionLevel']
                 datetime = item['datetime']
-                df = df.append({
+                new = pd.DataFrame({
                     #'Id': area_id,
-                    'ticker': area_name,
-                    'y': congestion,
+                    'ticker': [area_name],
+                    'y': [congestion],
                     #'CongestionLevel': congestion_level,
-                    'ds': datetime
-                }, ignore_index=True)
+                    'ds': [datetime]
+                })
+                df=pd.concat([df,new], ignore_index=True)
 
         return df
     def switch_to_next_key():
