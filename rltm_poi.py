@@ -126,6 +126,13 @@ def append_rltm_data():
         df=pd.concat([df, df_new], ignore_index=True)
         print("New data fetched and appended.")
         
+        #레벨
+        bins=[0,0.0175,0.035,0.21,0.4,float('inf')]
+        labels=['여유','보통','조금 혼잡','혼잡','매우 혼잡']
+        num_labels=[1,2,3,4,5]
+        df['level']=pd.cut(df['y'], bins=bins, labels=labels)
+        df['num_level']=pd.cut(df['y'], bins=bins, labels=num_labels)
+        
         #시각화(png, html로 저장)
         visualize_rltm_data(df)
 
@@ -142,11 +149,21 @@ def append_rltm_data():
 def visualize_rltm_data(rltm):
     # 예측데이터 
     total_pred = pd.read_csv("total_pred.csv")
+    
     # 날짜시간 타입으로 변경
     total_pred['ds'] = pd.to_datetime(total_pred['ds'])
     total_pred=total_pred.set_index(total_pred['ds'], drop=True)
+    
     # 100제곱미터당 0-9명 단위로 나타나도록 예측값 변경
     total_pred['pred_100m2'] = total_pred['yhat']*100
+    
+    #레벨
+    bins=[0,0.0175,0.035,0.21,0.4,float('inf')]
+    labels=['여유','보통','조금 혼잡','혼잡','매우 혼잡']
+    num_labels=[1,2,3,4,5]
+    
+    total_pred['level']=pd.cut(total_pred['yhat'], bins=bins, labels=labels)
+    total_pred['num_level']=pd.cut(total_pred['yhat'], bins=bins, labels=num_labels)
 
     ticker_list=list(total_pred.ticker.unique())
     for ticker in ticker_list:
@@ -155,7 +172,7 @@ def visualize_rltm_data(rltm):
         print(ticker)
 
         print(pred.index[0].date().strftime('%m월 %d일'))
-        day_pred=pred[0:0+24]['pred_100m2'] #하루치 예측값, index에는 시간
+        day_pred=pred[0:0+24][['pred_100m2','level','num_level']] #하루치(today) 예측값, index에는 시간
         #print(day_pred)
         time_values=day_pred.index.strftime('%H시')
         rltm_time_values=rltm_df.ds.dt.strftime('%H시')
@@ -163,23 +180,33 @@ def visualize_rltm_data(rltm):
         fig=go.Figure()
         fig.add_trace(go.Scatter(
                 x=time_values,
-                y=day_pred.values,
-                mode='lines',
+                y=day_pred['pred_100m2'],
+                mode='lines+markers',
+                marker={'symbol':'circle', 'size': 8},
                 #fill='tozeroy',  # 면적 채우기 설정
-                name=ticker,
+                #name=ticker,
+                hovertemplate='%{x}: %{y}명<br>%{text}단계: %{customdata}',
+                text=day_pred['num_level'],
+                customdata=day_pred['level']
             ))
 
         fig.add_trace(go.Bar(
                 x=rltm_time_values,
                 y=rltm_df['y_100m2'],
-                hovertemplate='%{x}: %{y}명'
-
+                hovertemplate='%{x}: %{y}명<br>%{text}단계: %{customdata}',
+                text=rltm_df['num_level'],
+                customdata=rltm_df['level']
             ))
 
 
         fig.update_layout(
             #title={'text': ticker, 'x': 0.5},
-            xaxis={'title': None, 'tickformat': '%H시'},
+            xaxis={'title': None, 'tickformat': '%H시',
+                    'tickmode': 'array',  # 눈금을 배열 모드로 설정
+                    'tickvals': time_values[::3],  # 3시간 간격으로 눈금 값 설정
+                    'ticktext': time_values[::3],  # 눈금에 표시될 텍스트 설정
+                    'tickangle': 0,  # 눈금 텍스트의 회전 각도 설정
+                  },
             yaxis={'title': '혼잡도(명/100㎡)', 'showgrid':True, 'gridcolor':'lightgray'},
             plot_bgcolor='white',
             paper_bgcolor='white',

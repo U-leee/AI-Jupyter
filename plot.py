@@ -56,14 +56,11 @@ def save_fig_as_html(fig, filename):
     
    
 
-def visualize_future_data():
-    # 예측데이터 
-    total_pred = pd.read_csv("total_pred.csv")
+def visualize_future_data(total_pred):
+    
     # 날짜시간 타입으로 변경
     total_pred['ds'] = pd.to_datetime(total_pred['ds'])
     total_pred=total_pred.set_index(total_pred['ds'], drop=True)
-    # 100제곱미터당 0-9명 단위로 나타나도록 예측값 변경
-    total_pred['pred_100m2'] = total_pred['yhat']*100
 
     ticker_list=list(total_pred.ticker.unique())
     
@@ -76,17 +73,20 @@ def visualize_future_data():
         print(ticker)
         for i in range(24,len(pred),24):
             print(pred.index[i].date().strftime('%m월 %d일'))
-            day_pred=pred[i:i+24]['pred_100m2'] #하루치 예측값, index에는 시간
+            day_pred=pred[i:i+24][['pred_100m2','level','num_level']] #하루치 예측값, index에는 시간
             #print(day_pred)
             time_values=day_pred.index.strftime('%H시')
 
             fig=go.Figure(go.Scatter(
                 x=time_values,
-                y=day_pred.values,
-                mode='lines',
+                y=day_pred['pred_100m2'],
+                mode='lines+markers',
+                marker={'symbol':'circle', 'size': 8},
                 fill='tozeroy',  # 면적 채우기 설정
-                name=ticker,
-                hovertemplate='%{x}: %{y}명'
+                #name=ticker,
+                hovertemplate='%{x}: %{y}명<br>%{text}단계: %{customdata}',
+                text=day_pred['num_level'],
+                customdata=day_pred['level']
             ))
 
             fig.update_layout(
@@ -116,4 +116,4 @@ def visualize_future_data():
 
             
 if __name__=='__main__':
-    visualize_future_data()
+    visualize_future_data(total_pred)
