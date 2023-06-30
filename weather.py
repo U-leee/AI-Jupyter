@@ -5,8 +5,8 @@ import requests, xmltodict
 
 #하루전까지 날씨 (train)
 def train_weather():
-    max_retries=4
-    retry_delay=5
+    max_retries=10
+    retry_delay=3
     
     for attempt in range(max_retries):
         try:
