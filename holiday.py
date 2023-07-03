@@ -3,15 +3,26 @@ import pandas as pd
 import requests, xmltodict
 
 def holiday_api(year):
-    decoding_key='6tblOMEsON8DV8mDJwrWHEDqFscUjGc0P1JLpq5QZE8Y/7jyE2piugAbGHDiy4oKYwbAaLiP+i9L1wb3HZ9VnQ=='
-    url = 'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo'
-    params ={'serviceKey' : decoding_key, 'pageNo' : '1', 'numOfRows' : '100', 'solYear' : str(year)}
+    max_retries=10
+    retry_delay=3
+    
+    for attempt in range(max_retries):
+        try:    
+            decoding_key='6tblOMEsON8DV8mDJwrWHEDqFscUjGc0P1JLpq5QZE8Y/7jyE2piugAbGHDiy4oKYwbAaLiP+i9L1wb3HZ9VnQ=='
+            url = 'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo'
+            params ={'serviceKey' : decoding_key, 'pageNo' : '1', 'numOfRows' : '100', 'solYear' : str(year)}
 
-    response = requests.get(url, params=params)
+            response = requests.get(url, params=params)
 
-    holiday=xmltodict.parse(response.text)
-    return holiday
+            holiday=xmltodict.parse(response.text)
+            return holiday
 
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            print(f"Retrying ({attempt+1}/{max_retries}) in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+        
+        raise Exception("Exceeded maximum number of retries for train_weather()")
 
 def make_holiday_df():
     year=datetime.today().year
@@ -51,3 +62,7 @@ def make_holiday_df():
     holiday_df.reset_index(inplace=True, drop=True)
     
     return holiday_df
+
+
+if __name__=='__main__':
+    holiday=make_holiday_df()
