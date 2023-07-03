@@ -16,7 +16,7 @@ if __name__=='__main__':
     total_pred['pred_100m2'] = round(total_pred['yhat']*100,1)
     
     #레벨
-    bins=[0,0.0175,0.035,0.21,0.4,float('inf')]
+    bins=[-0.01,0.0175,0.035,0.21,0.4,float('inf')]
     labels=['여유','보통','조금 혼잡','혼잡','매우 혼잡']
     num_labels=[1,2,3,4,5]
     
