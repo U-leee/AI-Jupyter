@@ -124,6 +124,7 @@ def append_rltm_data():
     if len(df)<144:
         df_new=rltm_poi()
         df=pd.concat([df, df_new], ignore_index=True)
+        df.ds=pd.to_datetime(df.ds)
         print("New data fetched and appended.")
         
         #레벨
@@ -155,7 +156,7 @@ def visualize_rltm_data(rltm):
     total_pred=total_pred.set_index(total_pred['ds'], drop=True)
     
     # 100제곱미터당 0-9명 단위로 나타나도록 예측값 변경
-    total_pred['pred_100m2'] = total_pred['yhat']*100
+    total_pred['pred_100m2'] = round(total_pred['yhat']*100,1) #소수점 첫째자리까지
     
     #레벨
     bins=[0,0.0175,0.035,0.21,0.4,float('inf')]
@@ -176,7 +177,8 @@ def visualize_rltm_data(rltm):
         #print(day_pred)
         time_values=day_pred.index.strftime('%H시')
         rltm_time_values=rltm_df.ds.dt.strftime('%H시')
-
+        rltm_values=round(rltm_df['y_100m2'],1) #소수점 첫째자리까지
+        
         fig=go.Figure()
         fig.add_trace(go.Scatter(
                 x=time_values,
@@ -190,17 +192,18 @@ def visualize_rltm_data(rltm):
                 customdata=day_pred['level']
             ))
 
+       
         fig.add_trace(go.Bar(
                 x=rltm_time_values,
-                y=rltm_df['y_100m2'],
-                hovertemplate='%{x}: %{y}명<br>%{text}단계: %{customdata}',
+                y=rltm_values,
+                hovertemplate='%{y}명<br>%{text}단계: %{customdata}',
                 text=rltm_df['num_level'],
-                customdata=rltm_df['level']
+                customdata=rltm_df['level'],
             ))
 
 
         fig.update_layout(
-            #title={'text': ticker, 'x': 0.5},
+            title={'text': ticker, 'x': 0.5},
             xaxis={'title': None, 'tickformat': '%H시',
                     'tickmode': 'array',  # 눈금을 배열 모드로 설정
                     'tickvals': time_values[::3],  # 3시간 간격으로 눈금 값 설정
@@ -226,5 +229,6 @@ def visualize_rltm_data(rltm):
         
 
 if __name__=='__main__':
+    df=rltm_poi()
     rltm=append_rltm_data()
     #print(rltm)
