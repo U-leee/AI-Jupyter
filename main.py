@@ -1,7 +1,7 @@
 import time
 import pandas as pd
 from model import Model
-from plot import visualize_future_data
+from plot import visualize_future_data, visualize_areas
 
 if __name__=='__main__':
     #모델 실행 model.py -> total_pred.csv 생성됨
@@ -13,7 +13,7 @@ if __name__=='__main__':
     time.sleep(1)
     
     # 100제곱미터당 0-9명 단위로 나타나도록 예측값 변경
-    total_pred['pred_100m2'] = total_pred['yhat']*100
+    total_pred['pred_100m2'] = round(total_pred['yhat']*100,1)
     
     #레벨
     bins=[0,0.0175,0.035,0.21,0.4,float('inf')]
@@ -25,3 +25,6 @@ if __name__=='__main__':
     
     #t+1~ 그래프 시각화, html_files와 images 폴더에 저장
     visualize_future_data(total_pred)
+    
+    #6개 장소 시각화
+    visualize_areas(total_pred)

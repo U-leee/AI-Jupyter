@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.subplots import make_subplots
 
 
 def clear_image_folder():
@@ -114,6 +115,77 @@ def visualize_future_data(total_pred):
             save_fig_as_html(fig, html_filename)
             print(f"Image saved: {html_filename}")
 
+
+            
+def visualize_areas(total_pred):
+    total_pred['ds'] = pd.to_datetime(total_pred['ds'])
+    total_pred=total_pred[['ds','ticker','pred_100m2']]
+    df=total_pred.pivot_table('pred_100m2','ds','ticker')
+
+    ticker_list=list(total_pred.ticker.unique())
+
+    for day in range(0,len(df),24):
+        print(df.index[day].date().strftime('%m월 %d일'))
+        day_pred=df.iloc[day:day+24]
+        #print(day_pred)
+        time_values=day_pred.index.strftime('%H시')
+        fig = make_subplots(rows=len(ticker_list)//2 + len(ticker_list) % 2, cols=2, subplot_titles=ticker_list)
+
+        for i, ticker in enumerate(ticker_list):
+            row = i // 2 + 1
+            col = i % 2 + 1
+
+            fig_area = go.Scatter(
+                x=time_values,
+                y=day_pred[ticker],
+                mode='lines',
+                fill='tozeroy',
+                hovertemplate='%{x}: %{y}명',
+            )
+            fig.add_trace(fig_area, row=row, col=col)
+
+            fig.update_xaxes(
+                showgrid=False,
+                gridcolor='lightgray',
+                tickformat='%H시',
+                tickmode='array',
+                tickvals = time_values[::3],  # 3시간 간격으로 눈금 값 설정
+                ticktext = time_values[::3],  # 눈금에 표시될 텍스트 설정
+                row=row,
+                col=col
+            )
+            y_min=df.min().min()
+            y_max=df.max().max()
+            y_range=[y_min, y_max]
+            fig.update_yaxes(
+                showgrid=True,
+                gridcolor='lightgray',
+                title='혼잡도(명/100㎡)',
+                title_font={'size':9},
+                #range=y_range,
+                row=row,
+                col=col
+            )
+
+            fig.update_layout(
+                plot_bgcolor='white',
+                showlegend=False
+            )
+
+            #fig.show()
+
+        #이미지로 저장
+        image_filename = f"areas_{df.index[day].date().strftime('%m%d')}.png"
+        save_fig_as_png(fig, image_filename)
+        print(f"Image saved: {image_filename}")
+
+        #HTML로 저장
+        html_filename = f"areas_{df.index[day].date().strftime('%m%d')}.html"
+        save_fig_as_html(fig, html_filename)
+        print(f"Image saved: {html_filename}")
+    
+           
             
 if __name__=='__main__':
     visualize_future_data(total_pred)
+    visualize_areas(total_pred)
