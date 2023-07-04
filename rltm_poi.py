@@ -185,6 +185,7 @@ def visualize_rltm_data(rltm):
                 y=day_pred['pred_100m2'],
                 mode='lines+markers',
                 marker={'symbol':'circle', 'size': 8},
+                name='예측',
                 #fill='tozeroy',  # 면적 채우기 설정
                 #name=ticker,
                 hovertemplate='%{x}: %{y}명<br>%{text}단계: %{customdata}',
@@ -196,6 +197,7 @@ def visualize_rltm_data(rltm):
         fig.add_trace(go.Bar(
                 x=rltm_time_values,
                 y=rltm_values,
+                name='실시간',
                 hovertemplate='%{y}명<br>%{text}단계: %{customdata}',
                 text=rltm_df['num_level'],
                 customdata=rltm_df['level'],
@@ -213,7 +215,7 @@ def visualize_rltm_data(rltm):
             yaxis={'title': '혼잡도(명/100㎡)', 'showgrid':True, 'gridcolor':'lightgray'},
             plot_bgcolor='white',
             paper_bgcolor='white',
-            showlegend=False,
+            showlegend=True,
         )
         #fig.show()
         
